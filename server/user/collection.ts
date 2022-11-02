@@ -47,6 +47,17 @@ class UserCollection {
   }
 
   /**
+   * Get all people that a user is following
+   *
+   * @param {string} username - The username of the user
+   * @return {Promise<HydratedDocument<User>[]>} - An array of all of the people that a user is following
+   */
+   static async findUsersWithUsername(username: string): Promise<Array<HydratedDocument<User>>> {
+    return UserModel.find({username});
+  }
+
+
+  /**
    * Find a user by username (case insensitive).
    *
    * @param {string} username - The username of the user to find

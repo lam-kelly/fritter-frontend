@@ -169,4 +169,22 @@ router.delete(
   }
 );
 
+/**
+ * Get the requested user
+ *
+ * @name GET /api/users/session
+ *
+ * @return - user if user with username was found, null otherwise
+ */
+ router.get(
+  '/:username?',
+  [
+    userValidator.isUserExists
+  ],
+  async (req: Request, res: Response) => {
+    const users = await UserCollection.findUsersWithUsername(req.params.username);
+    res.status(200).json(users.map(util.constructUserResponse));
+  }
+);
+
 export {router as userRouter};

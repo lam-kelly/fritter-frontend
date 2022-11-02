@@ -12,7 +12,10 @@ const store = new Vuex.Store({
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
-    alerts: {} // global success/error messages encountered during submissions to non-visible forms
+    alerts: {}, // global success/error messages encountered during submissions to non-visible forms
+    followees: [],
+    searchResults: [],
+    searchedUser: null,
   },
   mutations: {
     alert(state, payload) {
@@ -45,6 +48,20 @@ const store = new Vuex.Store({
        */
       state.freets = freets;
     },
+    updateSearchResults(state, users) {
+      /**
+       * Update the stored search results to the provided users.
+       * @param user - users to store
+       */
+      state.searchResults = users;
+    },
+    updateSearchedUser(state, username) {
+      /**
+       * Update the stored username to search for to the provided username.
+       * @param username - username to store
+       */
+      state.searchedUser = username;
+    },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
@@ -52,6 +69,20 @@ const store = new Vuex.Store({
       const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
+    },
+    async setFollowees(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      const url = state.username ? `/api/follows?follower=${state.username}` : '/api/follows';
+      const res = await fetch(url).then(async r => r.json());
+      state.followees = res;
+    },
+    clearFollowees(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      state.followees = [];
     }
   },
   // Store data across page refreshes, only discard on browser close
