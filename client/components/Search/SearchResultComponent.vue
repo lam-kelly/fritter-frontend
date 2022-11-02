@@ -105,8 +105,10 @@
       },
       userInFollowees(user) {
         for (var i=0; i<this.$store.state.followees.length; i++) {
-            if (user === this.$store.state.followees[i]) {
-                console.log(this.$store.state.followees[i])
+          // console.log("in loop")
+          // console.log(this.$store.state.followees[i].followee)
+            if (user.username === this.$store.state.followees[i].followee) {
+                // console.log(this.$store.state.followees[i])
                 return true;
             }
         }
