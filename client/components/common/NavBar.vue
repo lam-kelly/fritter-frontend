@@ -52,7 +52,14 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
+    /* position: relative; */
+
+    position:fixed;
+    z-index:200;
+    left:0;
+    top:0; 
+    width:100vw;
+
 }
 
 .title {

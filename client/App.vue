@@ -3,6 +3,8 @@
     <header>
       <NavBar />
     </header>
+    <div class="padding">
+    </div>
     <router-view />
   </div>
 </template>
@@ -73,5 +75,10 @@ main {
 
 .alerts .success {
     background-color: rgb(45, 135, 87);
+}
+
+.padding {
+  width: 100vw;
+  height: 50px;
 }
 </style>

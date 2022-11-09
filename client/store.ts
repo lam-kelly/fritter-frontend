@@ -22,6 +22,9 @@ const store = new Vuex.Store({
   getters: {
     endorsedFreetIds (state) {
       return state.endorsedFreets.map(endorsedObj => endorsedObj.freet);
+    },
+    followeesFreets (state) {
+      return state.freets.filter(freet => state.followees.map(followee => followee.followee).includes(freet.author))
     }
   },
   mutations: {
@@ -90,7 +93,6 @@ const store = new Vuex.Store({
       const url = state.username ? `/api/follows?follower=${state.username}` : '/api/follows';
       const res = await fetch(url).then(async r => r.json());
       state.followees = res;
-      console.log(state.followees)
     },
     async refreshWordMasks(state) {
       /**
@@ -99,11 +101,10 @@ const store = new Vuex.Store({
       if (state.username) {
         const url = `/api/word-mask`
         const res = await fetch(url).then(async r => r.json());
-        console.log("response")
-        console.log(res)
         state.wordMasks = res;
-        console.log("response2")
-        console.log(res)
+      }
+      else {
+        state.wordMasks = [];
       }
     },
     async refreshEndorsedFreets(state) {
@@ -111,12 +112,9 @@ const store = new Vuex.Store({
        * Request the server for the freets endorsed by the logged in user.
        */
       if (state.username) {
-        console.log("in store")
         const url = `/api/endorse?endorser=${state.username}`
         const res = await fetch(url).then(async r => r.json());
         state.endorsedFreets = res;
-        // console.log(res)
-        // console.log(state.endorsedFreets);
 
       }
     },

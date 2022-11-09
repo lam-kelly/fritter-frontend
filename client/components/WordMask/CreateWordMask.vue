@@ -89,7 +89,6 @@ export default {
       /**
         * Submits a form with the specified options from data().
         */
-       console.log("should not be here");
       const options = {
         method: this.method,
         headers: {'Content-Type': 'application/json'},

@@ -70,6 +70,15 @@ class EndorseCollection {
   static async deleteMany(userId: Types.ObjectId | string): Promise<void> {
     await EndorseModel.deleteMany({endorserId: userId});
   }
+
+  /**
+   * Delete all the endorsements by the given username
+   *
+   * @param {string} freetId - The id of freet
+   */
+   static async deleteManyWithFreetId(freetId: Types.ObjectId | string): Promise<void> {
+    await EndorseModel.deleteMany({freetId: freetId});
+  }
 }
 
 export default EndorseCollection;

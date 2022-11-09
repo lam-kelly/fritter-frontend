@@ -35,13 +35,32 @@
           <GetFreetsForm
             ref="getFreetsForm"
             value="author"
-            placeholder="🔍 Filter by author (optional)"
+            placeholder="🔍 Additionally filter by author (optional)"
             button="🔄 Get freets"
           />
         </div>
       </header>
+      <button v-if="seeFolloweesFreets"
+        @click="switchView"
+      >
+        Deactivate filter and See All Freets
+      </button>
+      <button v-else
+        @click="switchView"
+      >
+        Activate filter to See Your Followees' Freets
+      </button>
       <section
-        v-if="$store.state.freets.length"
+        v-if="seeFolloweesFreets && $store.getters.followeesFreets.length"
+      >
+        <FreetComponent
+          v-for="freet in $store.getters.followeesFreets"
+          :key="freet.id"
+          :freet="freet"
+        />
+      </section>
+      <section
+        v-else-if="!seeFolloweesFreets && $store.state.freets.length"
       >
         <FreetComponent
           v-for="freet in $store.state.freets"
@@ -69,8 +88,19 @@ export default {
   mounted() {
     this.$refs.getFreetsForm.submit();
     this.$store.commit("refreshEndorsedFreets");
+    this.$store.commit("refreshWordMasks")
     // console.log("in freet page")
     // console.log(this.$store.state.endorsedFreets);
+  },
+  data() {
+    return {
+      seeFolloweesFreets: false,
+    };
+  },
+  methods: {
+    switchView() {
+      this.seeFolloweesFreets = !this.seeFolloweesFreets
+    }
   }
 };
 </script>

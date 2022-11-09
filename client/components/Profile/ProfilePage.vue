@@ -32,7 +32,7 @@
       </header>  
       </section>
       <section>
-      <header>
+      <header v-if="$store.state.username">
         <div>
           <section
             v-if="$store.state.followees.length"

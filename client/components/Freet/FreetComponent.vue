@@ -13,24 +13,6 @@
         v-if="$store.state.username === freet.author"
         class="actions"
       >
-        <button
-          v-if="editing"
-          @click="submitEdit"
-        >
-          ✅ Save changes
-        </button>
-        <button
-          v-if="editing"
-          @click="stopEditing"
-        >
-          🚫 Discard changes
-        </button>
-        <button
-          v-if="!editing"
-          @click="startEditing"
-        >
-          ✏️ Edit
-        </button>
         <button @click="deleteFreet">
           🗑️ Delete
         </button>
@@ -49,7 +31,7 @@
     >
       {{ transformFreet(freet.content) }}
     </p>
-    <div>
+    <div v-if="$store.state.username">
       <button 
         v-if="isEndorsed()"
         @click="submitUnendorsement"
@@ -62,6 +44,7 @@
       >
         Endorse
       </button>
+      {{ count }}
     </div>
     <p class="info">
       Posted at {{ freet.dateModified }}
@@ -89,8 +72,14 @@ export default {
       required: true
     }
   },
+  watch: {
+    freet: function(newVal, oldVal) {
+      this.updateCount()
+    }
+  },
   data() {
     return {
+      count: 0,
       draft: this.freet.content, // Potentially-new content for this freet
       freetContent: this.freet.content,
       editing: false, // Whether or not this freet is in edit mode
@@ -98,20 +87,12 @@ export default {
     };
   },
   mounted() {
-    this.transformFreet(this.freet.content)
-    // console.log("mounted")
-    // console.log(this.$store.state.endorsedFreets)
-    // console.log(this.$store.state.endorsedFreets.length)
+    this.transformFreet(this.freet.content);
+    this.updateCount();
   },
   methods: {
     isEndorsed() {
-      console.log(this.freet._id)
-      // console.log("in endorse")
-      // console.log(this.$store.getters.endorsedFreetIds)
-      // console.log(this.$store.getters.endorsedFreetIds)
-      // console.log(this.$store.getters.endorsedFreetIds.includes(this.freet._id))
       return this.$store.getters.endorsedFreetIds.includes(this.freet._id);
-      // return this.$store.state.endorsedFreets.filter(freetId => this.freet._id).length ? true : false;
     },
     transformFreet(content) {
       let freetContent = content;
@@ -176,8 +157,6 @@ export default {
       /**
        * Endorse a freet
        */
-      console.log("here")
-      console.log(this.freet._id)
       const params = {
         url: `/api/endorse`,
         method: 'POST',
@@ -189,12 +168,12 @@ export default {
         }
       };
       this.request(params);
+      this.count += 1;
     },
     submitUnendorsement() {
       /**
        * Unendorse a freet
        */
-      console.log("in unendorse method, " + this.freet._id)
       const params = {
         url: `/api/endorse/${this.freet._id}`,
         method: 'DELETE',
@@ -205,6 +184,26 @@ export default {
         }
       };
       this.request(params);
+      this.count -= 1;
+    },
+    async updateCount() {
+      const options = {
+        method: 'GET', headers: {'Content-Type': 'application/json'}
+      };
+
+      try {
+        const r = await fetch(`/api/endorse?freetId=${this.freet._id}`, options);
+        const res = await r.json();
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+
+        this.count = res.length;
+
+      } catch (e) {
+        this.$set(this.alerts, e, 'error');
+        setTimeout(() => this.$delete(this.alerts, e), 3000);
+      }
     },
     async request(params) {
       /**
@@ -224,16 +223,12 @@ export default {
         const r = await fetch(params.url, options);
         if (!r.ok) {
           const res = await r.json();
-          console.log("error");
           throw new Error(res.error);
         }
 
         this.editing = false;
         this.$store.commit('refreshFreets');
-        console.log("refreshing endorsements");
         this.$store.commit('refreshEndorsedFreets');
-        console.log("after committing");
-        console.log(this.$store.state.endorsedFreets.length)
 
         params.callback();
       } catch (e) {

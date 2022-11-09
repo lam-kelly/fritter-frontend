@@ -11,7 +11,7 @@ const router = express.Router();
 /**
  * Get the endorsement objects corresponding with users who endorsed a certain freet
  *
- * @name GET /api/endorse?freet=freetId
+ * @name GET /api/endorse?freetId=freetId
  *
  * @return {EndorseResponse[]} - A list of all the freets that a user endorsed
  * @throws {400} - If freetId is not given
@@ -20,7 +20,9 @@ const router = express.Router();
  router.get(
     '/',
     async (req: Request, res: Response, next: NextFunction) => {
-      if (req.query.freetId !== undefined) next(); // skip to the next middleware in this substack
+      if (req.query.freetId !== undefined) {
+        next(); // skip to the next middleware in this substack
+      }
       else if (req.query.endorser !== undefined) next('route');
       // else
 
@@ -28,7 +30,7 @@ const router = express.Router();
         
     },
     [
-      freetValidator.isFreetExists
+      endorseValidator.isFreetFromQueryParamExists
     ],
     async (req: Request, res: Response) => {
         const endorsers = await EndorseCollection.findAllByFreetId(req.query.freetId as string);
@@ -81,7 +83,6 @@ router.post(
     endorseValidator.hasNotAlreadyEndorsed,
   ],
   async (req: Request, res: Response) => {
-    console.log("router: " + req.body.freetId)
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const endorsement = await EndorseCollection.addOne(userId, req.body.freetId);
 
