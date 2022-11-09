@@ -2,12 +2,13 @@
 
 <template>
     <main>
+      <section>
       <header>
         <div class="left">
           <section v-if="$store.state.username">
-            <header>
+            <span>
               <h2>Users that @{{ $store.state.username }} follow</h2>
-            </header>
+            </span>
           </section>
           <section v-else>
             <header>
@@ -19,9 +20,24 @@
               </h2>
             </header>
           </section>
+        </div>
+        <div class="right">
+          <SearchUsersForm
+            ref="searchUsersForm"
+            value="username"
+            placeholder="Find user"
+            button="Get users"
+          />
+        </div>
+      </header>  
+      </section>
+      <section>
+      <header>
+        <div>
           <section
             v-if="$store.state.followees.length"
           >
+            
             <FollowsUserComponent
               v-for="followee in $store.state.followees"
               :key=followee._id
@@ -34,22 +50,18 @@
             <h3>You currently are not following anyone</h3>
           </section>
         </div>
-        <div class="right">
-          <SearchUsersForm
-            ref="searchUsersForm"
-            value="username"
-            placeholder="Find user"
-            button="Get users"
-          />
+        <div>
           <section v-if="$store.state.searchResults.length">
+            <h4>Search Results...</h4>
             <SearchResultComponent
               v-for="user in $store.state.searchResults"
               :key="user.id"
               :user="user"
-          />
+            />
           </section>
         </div>
       </header>
+    </section>
     </main>
   </template>
   
@@ -63,7 +75,8 @@
     components: {FollowsUserComponent, SearchUsersForm, SearchResultComponent},
     mounted() {
       // get all the followers of a user
-      this.$store.commit('setFollowees');
+      this.$store.commit('refreshFollowees');
+      this.$store.commit('updateSearchResults', []);
     }
   };
   </script>
@@ -89,5 +102,11 @@
     padding: 3%;
     overflow-y: scroll;
   }
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
   </style>
   

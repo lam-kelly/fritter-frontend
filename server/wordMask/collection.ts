@@ -69,12 +69,14 @@ class WordMaskCollection {
    * Update a word mask with a new replacement word
    *
    * @param {string} wordMaskId - The id of the word mask to update
+   * @param {string} censoredWord - The word the user wants to censor
    * @param {string} replacementWord - The word to replace the censored word with
    * @return {Promise<HydratedDocument<Freet>>} - The newly updated word mask
    */
-   static async updateOne(wordMaskId: Types.ObjectId | string, replacementWord: string): Promise<HydratedDocument<WordMask>> {
+   static async updateOne(wordMaskId: Types.ObjectId | string, censoredWord: string, replacementWord: string): Promise<HydratedDocument<WordMask>> {
     const wordMask = await WordMaskModel.findOne({_id: wordMaskId});
     wordMask.replacementWord = replacementWord;
+    wordMask.censoredWord = censoredWord;
     await wordMask.save();
     return wordMask.populate('userId');
   }

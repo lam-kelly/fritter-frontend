@@ -68,8 +68,6 @@ const isFolloweeExists = async (req: Request, res: Response, next: NextFunction)
     }
 
     const isValidFollowee = await FollowerCollection.findOne(req.session.userId, req.params.followee as string);
-    console.log("should be empty: " + isValidFollowee)
-    console.log(!isValidFollowee)
     if (!isValidFollowee) {
         res.status(404).json({
           error: `The user is not following ${req.params.followee as string}.`
@@ -92,7 +90,6 @@ const isFolloweeExists = async (req: Request, res: Response, next: NextFunction)
     }
 
     const followee = await UserCollection.findOneByUsername(req.body.followee)
-    console.log("followee: " + followee)
     if (!followee) {
         res.status(404).json({
             error: `The user ${req.body.followee as string} doesn't exist.`

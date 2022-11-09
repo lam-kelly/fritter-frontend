@@ -29,6 +29,9 @@
       <router-link to="/profile">
         Profile
       </router-link>
+      <router-link to="/wordMasks">
+        Word Masks
+      </router-link>
     </div>
     <section class="alerts">
       <article

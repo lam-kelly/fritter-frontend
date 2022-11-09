@@ -24,10 +24,7 @@ import EndorseCollection from './collection';
  * Checks if the passed in user is a valid and current account holder
  */
  const isValidUser = async (req: Request, res: Response, next: NextFunction) => {
-    console.log('in middleware')
-    console.log(req.query.endorser + ".")
     if (!req.query.endorser) {
-        console.log('middleware should be here')
         res.status(400).json({
           error: 'Provided endorser username must be nonempty.'
         });

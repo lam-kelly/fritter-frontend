@@ -2,39 +2,45 @@
 <!-- This is just an example; feel free to define any reusable components you want! -->
 
 <template>
-  <form @submit.prevent="submit">
-    <h3>{{ title }}</h3>
-    <article
-      v-if="fields.length"
+  <button 
+      v-if="!createWordMask"
+      @click="addWordMask"
     >
-      <div
-        v-for="field in fields"
-        :key="field.id"
-      >
-        <label :for="field.id">{{ field.label }}:</label>
-        <textarea
-          v-if="field.id === 'content' || field.id === 'censoredWord' || field.id === 'replacementWord'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value"
-        />
-        <input
-          v-else
-          :type="field.id === 'password' ? 'password' : 'text'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value"
+      Add Word Mask
+  </button>
+  <form 
+    v-else
+  >
+    <div>
+      <h3>Create a Word Mask</h3>
+      <article>
+        <div
+          v-for="field in fields"
+          :key="field.id"
         >
+          <label :for="field.id">{{ field.label }}:</label>
+          <input
+            :name="field.id"
+            :value="field.value"
+            @input="field.value = $event.target.value"
+          >
+        </div>
+      </article>
+      <div class="inline">
+        <button 
+          class="inline"
+          @click="submitWordMask"
+        >
+          Create a Word Mask
+        </button>
+        <button 
+          class="inline"
+          @click="cancel"
+        >
+          Cancel
+        </button>
       </div>
-    </article>
-    <article v-else>
-      <p>{{ content }}</p>
-    </article>
-    <button
-      type="submit"
-    >
-      {{ title }}
-    </button>
+    </div>
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -46,31 +52,44 @@
     </section>
   </form>
 </template>
-
+  
 <script>
-
 export default {
-  name: 'BlockForm',
+  name: 'CreateWordMask',
   data() {
     /**
      * Options for submitting this form.
      */
     return {
-      url: '', // Url to submit form to
-      method: 'GET', // Form request method
-      hasBody: false, // Whether or not form request has a body
-      setUsername: false, // Whether or not stored username should be updated after form submission
-      refreshFreets: false, // Whether or not stored freets should be updated after form submission
+      createWordMask: false,
+      url: '/api/word-mask', // Url to submit form to
+      method: 'POST', // Form request method
+      hasBody: true, // Whether or not form request has a body
       refreshWordMasks: false,
+      fields: [
+          {id: 'censoredWord', label: 'Word to Censor', value: ''},
+          {id: 'replacementWord', label: 'Replacement Word', value: ''}
+      ],
       alerts: {}, // Displays success/error messages encountered during form submission
-      callback: null // Function to run after successful form submission
+      callback: () => {
+        const message = 'Successfully created word mask!';
+        this.$set(this.alerts, message, 'success');
+        setTimeout(() => this.$delete(this.alerts, message), 3000);
+      }
     };
   },
   methods: {
-    async submit() {
+    cancel() {
+      this.createWordMask = false;
+    },
+    addWordMask() {
+      this.createWordMask = true;
+    },
+    async submitWordMask() {
       /**
         * Submits a form with the specified options from data().
         */
+       console.log("should not be here");
       const options = {
         method: this.method,
         headers: {'Content-Type': 'application/json'},
@@ -94,27 +113,16 @@ export default {
           throw new Error(res.error);
         }
 
-        if (this.setUsername) {
-          const text = await r.text();
-          const res = text ? JSON.parse(text) : {user: null};
-          this.$store.commit('setUsername', res.user ? res.user.username : null);
-        }
+        this.$store.commit('refreshWordMasks')
 
-        if (this.refreshFreets) {
-          this.$store.commit('refreshFreets');
-        }
-
-        if (this.refreshWordMasks) {
-          this.$store.commit('refreshWordMasks')
-        }
-
-        if (this.callback) {
-          this.callback();
-        }
+        this.callback();
+        
       } catch (e) {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
+
+      this.createWordMask = false;
     }
   }
 };
@@ -150,7 +158,12 @@ form h3 {
 }
 
 textarea {
-   font-family: inherit;
-   font-size: inherit;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.inline {
+  width: 50%;
+  display: inline;
 }
 </style>

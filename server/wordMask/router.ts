@@ -86,6 +86,7 @@ router.delete(
  *
  * @name PUT /api/word-mask/:wordMaskId?
  *
+ * @param {string} censoredWord - the new censored word
  * @param {string} replacementWord - the new replacement word that corresponds with the censored word
  * @return {WordMaskResponse} - the updated word mask
  * @throws {403} - if the user is not logged in or did not create the word mask
@@ -99,7 +100,7 @@ router.put(
     wordMaskValidator.isValidWordMaskModifier
   ],
   async (req: Request, res: Response) => {
-    const wordMask = await WordMaskCollection.updateOne(req.params.wordMaskId, req.body.replacementWord);
+    const wordMask = await WordMaskCollection.updateOne(req.params.wordMaskId, req.body.censoredWord, req.body.replacementWord);
     res.status(200).json({
       message: 'Your word mask was updated successfully.',
       wordMask: util.constructWordMaskResponse(wordMask)

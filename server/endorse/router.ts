@@ -53,7 +53,6 @@ router.get(
     endorseValidator.isValidUser
   ],
   async (req: Request, res: Response) => {
-    console.log('here');
     if (req.query.endorser) 
     {
       const freets = await EndorseCollection.findAllByUsername(req.query.endorser as string);
@@ -82,10 +81,11 @@ router.post(
     endorseValidator.hasNotAlreadyEndorsed,
   ],
   async (req: Request, res: Response) => {
+    console.log("router: " + req.body.freetId)
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const endorsement = await EndorseCollection.addOne(userId, req.body.freetId);
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'You successfully endorsed freet with id ' + req.body.freetId,
       endorsement: util.constructEndorseResponse(endorsement)
     });
@@ -109,7 +109,6 @@ router.delete(
     endorseValidator.isValidEndorseRemover
   ],
   async (req: Request, res: Response) => {
-    console.log("jadflsk;adsfjkl " + req.params.freetId)
     await EndorseCollection.deleteOne(req.session.userId, req.params.freetId);
     res.status(200).json({
       message: 'Your endorsement was deleted successfully.'

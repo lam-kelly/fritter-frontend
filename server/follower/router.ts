@@ -82,7 +82,6 @@ const router = express.Router();
         followerValidator.isFolloweeExists,
     ],
     async (req: Request, res: Response) => {
-        console.log("in router: " + req.params)
         await FollowerCollection.deleteOne(req.session.userId, req.params.followee);
         res.status(200).json({
             message: 'Your unfollowed successfully.'
@@ -108,7 +107,6 @@ router.post(
         followerValidator.isValidFollowee,
     ],
     async (req: Request, res: Response) => {
-        console.log("should be here")
         const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
         const follower = await FollowerCollection.addOne(userId, req.body.followee);
         res.status(201).json({

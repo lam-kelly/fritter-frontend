@@ -79,7 +79,7 @@
             throw new Error(res.error);
           }
 
-          this.$store.commit('setFollowees');
+          this.$store.commit('refreshFollowees');
   
           params.callback();
         } catch (e) {
@@ -90,11 +90,4 @@
     }
   };
   </script>
-  
-  <style scoped>
-  .freet {
-      border: 1px solid #111;
-      padding: 20px;
-      position: relative;
-  }
-  </style>
+ 

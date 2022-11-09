@@ -35,6 +35,7 @@
           🗑️ Delete
         </button>
       </div>
+      
     </header>
     <textarea
       v-if="editing"
@@ -46,8 +47,22 @@
       v-else
       class="content"
     >
-      {{ freet.content }}
+      {{ transformFreet(freet.content) }}
     </p>
+    <div>
+      <button 
+        v-if="isEndorsed()"
+        @click="submitUnendorsement"
+      >
+        Unendorse
+      </button>
+      <button 
+        v-if="!isEndorsed()"
+        @click="submitEndorsement"
+      >
+        Endorse
+      </button>
+    </div>
     <p class="info">
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
@@ -76,12 +91,35 @@ export default {
   },
   data() {
     return {
-      editing: false, // Whether or not this freet is in edit mode
       draft: this.freet.content, // Potentially-new content for this freet
+      freetContent: this.freet.content,
+      editing: false, // Whether or not this freet is in edit mode
       alerts: {} // Displays success/error messages encountered during freet modification
     };
   },
+  mounted() {
+    this.transformFreet(this.freet.content)
+    // console.log("mounted")
+    // console.log(this.$store.state.endorsedFreets)
+    // console.log(this.$store.state.endorsedFreets.length)
+  },
   methods: {
+    isEndorsed() {
+      console.log(this.freet._id)
+      // console.log("in endorse")
+      // console.log(this.$store.getters.endorsedFreetIds)
+      // console.log(this.$store.getters.endorsedFreetIds)
+      // console.log(this.$store.getters.endorsedFreetIds.includes(this.freet._id))
+      return this.$store.getters.endorsedFreetIds.includes(this.freet._id);
+      // return this.$store.state.endorsedFreets.filter(freetId => this.freet._id).length ? true : false;
+    },
+    transformFreet(content) {
+      let freetContent = content;
+      for (let i=0; i<this.$store.state.wordMasks.length; i++) {
+        freetContent = freetContent.replace(new RegExp(this.$store.state.wordMasks[i].censoredWord, 'g'), this.$store.state.wordMasks[i].replacementWord);
+      }
+      return freetContent;
+    },
     startEditing() {
       /**
        * Enables edit mode on this freet.
@@ -101,6 +139,7 @@ export default {
        * Deletes this freet.
        */
       const params = {
+        url: `/api/freets/${this.freet._id}`,
         method: 'DELETE',
         callback: () => {
           this.$store.commit('alert', {
@@ -122,9 +161,44 @@ export default {
       }
 
       const params = {
+        url: `/api/freets/${this.freet._id}`,
         method: 'PATCH',
         message: 'Successfully edited freet!',
         body: JSON.stringify({content: this.draft}),
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(params);
+    },
+    submitEndorsement() {
+      /**
+       * Endorse a freet
+       */
+      console.log("here")
+      console.log(this.freet._id)
+      const params = {
+        url: `/api/endorse`,
+        method: 'POST',
+        message: 'Successfully endorsed freet!',
+        body: JSON.stringify({freetId: this.freet._id}),
+        callback: () => {
+          this.$set(this.alerts, params.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+        }
+      };
+      this.request(params);
+    },
+    submitUnendorsement() {
+      /**
+       * Unendorse a freet
+       */
+      console.log("in unendorse method, " + this.freet._id)
+      const params = {
+        url: `/api/endorse/${this.freet._id}`,
+        method: 'DELETE',
+        message: 'Successfully unendorsed freet!',
         callback: () => {
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);
@@ -147,14 +221,19 @@ export default {
       }
 
       try {
-        const r = await fetch(`/api/freets/${this.freet._id}`, options);
+        const r = await fetch(params.url, options);
         if (!r.ok) {
           const res = await r.json();
+          console.log("error");
           throw new Error(res.error);
         }
 
         this.editing = false;
         this.$store.commit('refreshFreets');
+        console.log("refreshing endorsements");
+        this.$store.commit('refreshEndorsedFreets');
+        console.log("after committing");
+        console.log(this.$store.state.endorsedFreets.length)
 
         params.callback();
       } catch (e) {

@@ -34,11 +34,12 @@ class FollowerCollection {
    * Unfollow a followee given followerId and followeeId
    *
    * @param {string} followerId - The Id of the follower that is unfollowing
-   * @param {string} followeeId - The Id of the followee this is being unfollowed
+   * @param {string} followeeUsername - The Id of the followee this is being unfollowed
    * @return {Promise<Boolean>} - true if the follower has unfollowed the followee, false otherwise
    */
-   static async deleteOne(followerId: Types.ObjectId | string, followeeId: Types.ObjectId | string): Promise<boolean> {
-    const follower = await FollowerModel.deleteOne({followeeId, followerId});
+   static async deleteOne(followerId: Types.ObjectId | string, followeeUsername: string): Promise<boolean> {
+    const followee = await UserCollection.findOneByUsername(followeeUsername)
+    const follower = await FollowerModel.deleteOne({followee, follower: followerId});
     return follower !== null;
   }
 
@@ -58,7 +59,7 @@ class FollowerCollection {
    * Get all people that a user is following
    *
    * @param {string} username - The username of the user
-   * @return {Promise<HydratedDocument<User>[]>} - An array of all of the people that a user is following
+   * @return {Promise<HydratedDocument<Follower>[]>} - An array of all of the people that a user is following
    */
    static async findAllFolloweesOfUsername(username: string): Promise<Array<HydratedDocument<Follower>>> {
     const user = await UserCollection.findOneByUsername(username);
@@ -69,7 +70,7 @@ class FollowerCollection {
    * Get all people is following the user
    *
    * @param {string} username - The username of the user
-   * @return {Promise<HydratedDocument<User>[]>} - An array of all of the people that a user is following
+   * @return {Promise<HydratedDocument<Follower>[]>} - An array of all of the people that a user is following
    */
    static async findAllFollowersOfUsername(username: string): Promise<Array<HydratedDocument<Follower>>> {
     const user = await UserCollection.findOneByUsername(username);

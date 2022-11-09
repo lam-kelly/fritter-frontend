@@ -68,6 +68,9 @@ export default {
   components: {FreetComponent, GetFreetsForm, CreateFreetForm},
   mounted() {
     this.$refs.getFreetsForm.submit();
+    this.$store.commit("refreshEndorsedFreets");
+    // console.log("in freet page")
+    // console.log(this.$store.state.endorsedFreets);
   }
 };
 </script>

@@ -16,6 +16,13 @@ const store = new Vuex.Store({
     followees: [],
     searchResults: [],
     searchedUser: null,
+    wordMasks: [],
+    endorsedFreets: [],
+  },
+  getters: {
+    endorsedFreetIds (state) {
+      return state.endorsedFreets.map(endorsedObj => endorsedObj.freet);
+    }
   },
   mutations: {
     alert(state, payload) {
@@ -62,6 +69,12 @@ const store = new Vuex.Store({
        */
       state.searchedUser = username;
     },
+    clearFollowees(state) {
+      /**
+       * Request the server for the currently available freets.
+       */
+      state.followees = [];
+    },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
@@ -70,20 +83,43 @@ const store = new Vuex.Store({
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
     },
-    async setFollowees(state) {
+    async refreshFollowees(state) {
       /**
        * Request the server for the currently available freets.
        */
       const url = state.username ? `/api/follows?follower=${state.username}` : '/api/follows';
       const res = await fetch(url).then(async r => r.json());
       state.followees = res;
+      console.log(state.followees)
     },
-    clearFollowees(state) {
+    async refreshWordMasks(state) {
       /**
        * Request the server for the currently available freets.
        */
-      state.followees = [];
-    }
+      if (state.username) {
+        const url = `/api/word-mask`
+        const res = await fetch(url).then(async r => r.json());
+        console.log("response")
+        console.log(res)
+        state.wordMasks = res;
+        console.log("response2")
+        console.log(res)
+      }
+    },
+    async refreshEndorsedFreets(state) {
+      /**
+       * Request the server for the freets endorsed by the logged in user.
+       */
+      if (state.username) {
+        console.log("in store")
+        const url = `/api/endorse?endorser=${state.username}`
+        const res = await fetch(url).then(async r => r.json());
+        state.endorsedFreets = res;
+        // console.log(res)
+        // console.log(state.endorsedFreets);
+
+      }
+    },
   },
   // Store data across page refreshes, only discard on browser close
   plugins: [createPersistedState()]
